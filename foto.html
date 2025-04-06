@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ScanFinity - Pink Esthetic Gallery</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.21.2/babel.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Warna tema pink */
+        :root {
+            --pink-light: #ffcfe0;
+            --pink-medium: #ff9ebb;
+            --pink-dark: #ff6b9a;
+            --pink-darker: #ff4980;
+            --pink-darkest: #e02b62;
+        }
+    /* Background gradient pink */
+    body {
+        background: linear-gradient(135deg, var(--pink-light), var(--pink-medium));
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        padding: 0;
+        color: white;
+        overflow-x: hidden;
+         max-width: 100vw;
+         box-sizing: border-box;
+    }
+
+    /* CSS untuk tata letak dinamis */
+    .gallery {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        grid-auto-rows: 250px; /* Tinggi dasar */
+        gap: 20px;
+        padding: 20px;
+        max-width: 1400px;
+        margin: 0 auto;
+        transition: all 0.5s ease;
+    }
+
+    .gallery-item {
+        position: relative;
+        overflow: hidden;
+        border-radius: 20px;
+        box-shadow: 0 10px 25px rgba(255, 107, 154, 0.4);
+        transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        background: var(--pink-medium);
+        cursor: pointer;
+        border: 3px solid transparent;
+        transform-origin: center;
+    }
+
+    .gallery-item:hover {
+        transform: translateY(-10px) scale(1.05);
+        box-shadow: 0 15px 30px rgba(255, 107, 154, 0.6);
+        border-color: var(--pink-darker);
+        z-index: 10;
+    }
+
+    .gallery-item:active {
+        transform: scale(0.98);
+    }
+
+    .gallery-item img,
+    .gallery-item video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        border-radius: 16px;
+        transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+        filter: brightness(0.9);
+    }
+
+    .gallery-item:hover img,
+    .gallery-item:hover video {
+        transform: scale(1.1);
+        filter: brightness(1.1) contrast(1.1);
+    }
+
+    .gallery-item video {
+        background: #000;
+    }
+
+    /* Efek teks muncul saat hover */
+    .gallery-item .text-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        align-items: center;
+        background: linear-gradient(to top, rgba(255, 73, 128, 0.9) 0%, rgba(255, 73, 128, 0) 70%);
+        opacity: 0;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        padding: 1rem;
+        text-align: center;
+        transform: translateY(20px);
+        border-radius: 16px;
+    }
+
+    .gallery-item:hover .text-overlay {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .gallery-item .text-overlay h1 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 0.7rem;
+        color: white;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        transform: translateY(20px);
+        transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.1s;
+        opacity: 0;
+    }
+
+    .gallery-item .text-overlay p {
+        font-size: 1.1rem;
+        color: white;
+        margin: 0;
+        transform: translateY(20px);
+        transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.2s;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        opacity: 0;
+    }
+
+    .gallery-item:hover .text-overlay h1,
+    .gallery-item:hover .text-overlay p {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    /* Ribbon label untuk item */
+    .gallery-item::before {
+        content: attr(data-category);
+        position: absolute;
+        top: 20px;
+        right: -50px;
+        background: var(--pink-darkest);
+        color: white;
+        padding: 5px 40px;
+        transform: rotate(45deg);
+        font-size: 0.8rem;
+        font-weight: bold;
+        z-index: 5;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        opacity: 0;
+        transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .gallery-item:hover::before {
+        opacity: 1;
+        right: -40px;
+    }
+
+    /* Like button pada item gallery */
+    .gallery-item .like-button {
+        position: absolute;
+        top: 15px;
+        left: 15px;
+        background: rgba(255, 255, 255, 0.7);
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        z-index: 10;
+        transform: scale(0);
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .gallery-item:hover .like-button {
+        transform: scale(1);
+    }
+
+    .gallery-item .like-button.active {
+        background: var(--pink-darkest);
+        animation: pulse 0.5s;
+    }
+
+    .gallery-item .like-button svg {
+        width: 20px;
+        height: 20px;
+        fill: var(--pink-darkest);
+        transition: fill 0.3s ease, transform 0.3s ease;
+    }
+
+    .gallery-item .like-button.active svg {
+        fill: white;
+        transform: scale(1.2);
+    }
+
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.2); }
+        100% { transform: scale(1); }
+    }
+
+    /* Efek glitter pada gallery item */
+    .gallery-item::after {
+        content: '';
+        position: absolute;
+        width: 150%;
+        height: 150%;
+        top: -25%;
+        left: -25%;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0) 70%);
+        opacity: 0;
+        transition: opacity 0.5s ease;
+        mix-blend-mode: overlay;
+        pointer-events: none;
+    }
+
+    .gallery-item:hover::after {
+        opacity: 0.5;
+        animation: rotate 10s linear infinite;
+    }
+
+    @keyframes rotate {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    /* Ukuran acak untuk item */
+    .gallery-item[data-size="1"] {
+        grid-row-end: span 1;
+    }
+
+    .gallery-item[data-size="2"] {
+        grid-row-end: span 2;
+    }
+
+    .gallery-item[data-size="3"] {
+        grid-row-end: span 3;
+    }
+
+    /* Featured item yang lebih besar */
+    .gallery-item[data-featured="true"] {
+        grid-column-end: span 2;
+        grid-row-end: span 2;
+    }
+
+    /* Responsif untuk layar kecil */
+    @media (max-width: 640px) {
+        .gallery {
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            grid-auto-rows: 150px;
+            gap: 10px;
+        }
+
+        .gallery-item .text-overlay h1 {
+            font-size: 1.2rem;
+        }
+
+        .gallery-item .text-overlay p {
+            font-size: 0.9rem;
+        }
+        
+        .gallery-item[data-featured="true"] {
+            grid-column-end: span 1;
+            grid-row-end: span 1;
+        }
+    }
+
+    /* Filter buttons */
+    .filter-container {
+        display: flex;
+        justify-content: center;
+        margin: 0 auto 20px;
+        flex-wrap: wrap;
+        max-width: 800px;
+        gap: 10px;
+    }
+
+    .filter-button {
+        background: rgba(255, 255, 255, 0.2);
+        border: 2px solid var(--pink-darkest);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 30px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 600;
+        box-shadow: 0 4px 10px rgba(224, 43, 98, 0.3);
+    }
+
+    .filter-button:hover {
+        background: var(--pink-darkest);
+        transform: translateY(-3px);
+        box-shadow: 0 6px 15px rgba(224, 43, 98, 0.4);
+    }
+
+    .filter-button.active {
+        background: var(--pink-darkest);
+        transform: translateY(-3px);
+    }
+
+    /* Efek view mode switch */
+    .view-mode-container {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 20px;
+    }
+
+    .view-mode-switch {
+        display: flex;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 30px;
+        padding: 5px;
+        box-shadow: 0 4px 10px rgba(224, 43, 98, 0.3);
+    }
+
+    .view-mode-button {
+        padding: 8px 16px;
+        cursor: pointer;
+        border-radius: 25px;
+        transition: all 0.3s ease;
+        color: white;
+        font-weight: 600;
+    }
+
+    .view-mode-button.active {
+        background: var(--pink-darkest);
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+    }
+    
+    /* Mengubah tata letak gallery berdasarkan mode */
+    .gallery.list-mode {
+        grid-template-columns: 1fr;
+        grid-auto-rows: auto;
+    }
+
+    .gallery.list-mode .gallery-item {
+        display: flex;
+        flex-direction: row;
+        height: 150px;
+        border-radius: 15px;
+    }
+
+    .gallery.list-mode .gallery-item img,
+    .gallery.list-mode .gallery-item video {
+        width: 150px;
+        height: 150px;
+        border-radius: 12px 0 0 12px;
+    }
+
+    .gallery.list-mode .gallery-item .text-overlay {
+        position: relative;
+        opacity: 1;
+        background: none;
+        justify-content: center;
+        align-items: flex-start;
+        transform: none;
+        padding: 15px;
+    }
+
+    .gallery.list-mode .gallery-item .text-overlay h1,
+    .gallery.list-mode .gallery-item .text-overlay p {
+        transform: none;
+        opacity: 1;
+        text-align: left;
+        color: var(--pink-darkest);
+        text-shadow: none;
+    }
+
+    .gallery.list-mode .gallery-item .text-overlay h1 {
+        font-size: 1.2rem;
+        margin-bottom: 5px;
+    }
+
+    .gallery.list-mode .gallery-item .text-overlay p {
+        font-size: 0.9rem;
+        color: #333;
+    }
+
+    .gallery.list-mode .gallery-item::before {
+        display: none;
+    }
+    
+    /* Gallery loading animation */
+    @keyframes fadeIn {
+        0% { opacity: 0; transform: translateY(20px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
+    
+    .gallery-item {
+        animation: fadeIn 0.5s backwards;
+    }
+    
+    .gallery-item:nth-child(1) { animation-delay: 0.1s; }
+    .gallery-item:nth-child(2) { animation-delay: 0.2s; }
+    .gallery-item:nth-child(3) { animation-delay: 0.3s; }
+    .gallery-item:nth-child(4) { animation-delay: 0.4s; }
+    .gallery-item:nth-child(5) { animation-delay: 0.5s; }
+    .gallery-item:nth-child(6) { animation-delay: 0.6s; }
+    .gallery-item:nth-child(7) { animation-delay: 0.7s; }
+    .gallery-item:nth-child(8) { animation-delay: 0.8s; }
+
+    /* Judul dengan efek gradien pink */
+    .title {
+        font-size: 3rem;
+        font-weight: 700;
+        text-align: center;
+        margin: 2rem 0;
+        background: linear-gradient(135deg, var(--pink-dark), var(--pink-darkest));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: glow 2s infinite alternate;
+    }
+
+    @keyframes glow {
+        0% { text-shadow: 0 0 10px var(--pink-dark), 0 0 20px var(--pink-darkest); }
+        100% { text-shadow: 0 0 20px var(--pink-darkest), 0 0 40px var(--pink-dark); }
+    }
+
+    /* Efek latar belakang animasi */
+    .background-effect {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        background: radial-gradient(circle, rgba(255, 107, 154, 0.1), rgba(255, 107, 154, 0.2));
+        animation: background-pulse 5s infinite alternate;
+    }
+
+    @keyframes background-pulse {
+        0% { transform: scale(1); opacity: 0.5; }
+        100% { transform: scale(1.2); opacity: 1; }
+    }
+
+    /* Efek hati */
+  
+
+     .navbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        background-color: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        box-shadow: 0 2px 10px rgba(255, 107, 154, 0.2);
+        z-index: 100;
+        padding: 0.5rem 1rem; /* Mengurangi padding untuk responsivitas */
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: all 0.3s ease;
+    }
+
+    .navbar-brand {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--pink-dark);
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .navbar-icons {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .nav-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: linear-gradient(45deg, var(--pink-dark), var(--pink-medium));
+        color: white;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        box-shadow: 0 3px 10px rgba(255, 107, 154, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .nav-icon i {
+        font-size: 1.2rem;
+        transition: all 0.3s ease;
+        z-index: 2;
+    }
+
+    .nav-icon::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.2);
+        transition: all 0.4s ease;
+        z-index: 1;
+    }
+
+    .nav-icon:hover::before {
+        left: 100%;
+    }
+
+    .nav-icon:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 15px rgba(255, 107, 154, 0.5);
+    }
+
+    .nav-icon:active {
+        transform: translateY(0);
+        box-shadow: 0 3px 8px rgba(255, 107, 154, 0.4);
+    }
+
+    .home-icon:hover {
+        background: linear-gradient(45deg, var(--pink-darkest), var(--pink-dark));
+    }
+
+    .ig-icon:hover {
+        background: linear-gradient(45deg, #833AB4, #FD1D1D, #FCAF45);
+    }
+
+    /* Label untuk ikon pada layar yang lebih besar */
+    .nav-icon .icon-label {
+        display: none;
+        margin-left: 8px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: white;
+    }
+
+    /* Animasi untuk ikon */
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.15); }
+        100% { transform: scale(1); }
+    }
+
+    /* Ketika navbar di-scroll ke bawah (bisa ditambahkan dengan JavaScript) */
+    .navbar.scrolled {
+        padding: 0.3rem 1rem;
+        background-color: rgba(255, 255, 255, 0.95);
+        box-shadow: 0 3px 10px rgba(255, 107, 154, 0.3);
+    }
+
+    /* Responsive Styles - Ditingkatkan */
+    @media screen and (min-width: 992px) {
+        /* Pada layar besar, tambahkan animasi hover yang lebih menarik */
+        .nav-icon:hover i {
+            animation: pulse 1s infinite;
+        }
+        
+        /* Efek hover yang lebih halus */
+        .navbar-brand:hover {
+            color: var(--pink-darker);
+            transform: translateY(-2px);
+        }
+    }
+
+    @media screen and (min-width: 768px) and (max-width: 991px) {
+        .navbar {
+            padding: 0.5rem 1.5rem;
+        }
+        
+        .nav-icon {
+            width: 36px;
+            height: 36px;
+        }
+        
+        .nav-icon i {
+            font-size: 1.1rem;
+        }
+    }
+
+    @media screen and (min-width: 576px) and (max-width: 767px) {
+        .navbar {
+            padding: 0.4rem 1rem;
+        }
+        
+        .navbar-brand {
+            font-size: 1.3rem;
+        }
+        
+        .nav-icon {
+            width: 34px;
+            height: 34px;
+        }
+        
+        .nav-icon i {
+            font-size: 1rem;
+        }
+        
+        .navbar-icons {
+            gap: 0.8rem;
+        }
+    }
+
+    @media screen and (max-width: 575px) {
+        .navbar {
+            padding: 0.3rem 0.8rem;
+        }
+        
+        .navbar-brand {
+            font-size: 1.2rem;
+            max-width: 150px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .nav-icon {
+            width: 32px;
+            height: 32px;
+        }
+        
+        .nav-icon i {
+            font-size: 0.9rem;
+        }
+        
+        .navbar-icons {
+            gap: 0.6rem;
+        }
+    }
+
+    /* Handle untuk orientasi landscape pada perangkat mobile */
+    @media screen and (max-height: 500px) and (orientation: landscape) {
+        .navbar {
+            padding: 0.2rem 1rem;
+        }
+        
+        .nav-icon {
+            width: 30px;
+            height: 30px;
+        }
+        
+        .nav-icon i {
+            font-size: 0.85rem;
+        }
+    }
+
+    /* Opsi tampilan label pada layar lebih besar (opsional) */
+    @media screen and (min-width: 1200px) {
+        .nav-icon {
+            width: auto;
+            border-radius: 20px;
+            padding: 0 15px;
+        }
+        
+        .nav-icon .icon-label {
+            display: inline-block;
+        }
+    }
+</style>
+</head>
+<body>
+    <div id="root"></div>
+    <div className="background-effect"></div>
+    <iframe src="popup.html" style="border: none; position: fixed; bottom: 0; right: 0; width: 200px; height: 300px; z-index: 9999; background: none; pointer-events: all;" id="popup-frame"></iframe>
+    <iframe src="music.html" style="display:none;"></iframe>
+    <script>
+        // Kode untuk menangani komunikasi dengan iframe
+        window.addEventListener('message', function(event) {
+            // Pastikan pesan berasal dari iframe popup
+            if (event.data && event.data.action) {
+                switch(event.data.action) {
+                    case 'navigate':
+                        // Navigasi ke halaman yang dipilih
+                        window.location.href = event.data.data;
+                        break;
+                    case 'ready':
+                        console.log('Pop-up menu siap');
+                        break;
+                }
+            }
+        });
+    </script>
+
+    <script type="text/babel">
+       
+        
+        // Komponen Navbar
+        const Navbar = () => {
+            return (
+                <nav className="navbar">
+                    <a href="#" className="navbar-brand">ScanFinity</a>
+                    <div className="navbar-icons">
+                        <a href="layout.html" className="nav-icon home-icon" title="Home">
+                            <i className="fas fa-home"></i>
+                            <span className="icon-label">Home</span>
+                        </a>
+                        <a href="https://www.instagram.com/scanfinity?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="_blank" className="nav-icon ig-icon" title="Instagram">
+                            <i className="fab fa-instagram"></i>
+                            <span className="icon-label">Instagram</span>
+                        </a>
+                    </div>
+                </nav>
+            );
+        };
+
+        // Like Button SVG
+        const HeartIcon = ({ filled }) => (
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+            </svg>
+        );
+
+        // Komponen Gallery yang ditingkatkan
+        const Gallery = () => {
+            // Data foto dan video dengan ukuran acak dan kategori
+            const mediaItems = [
+                { type: 'image', src: './foto/1.jpg', alt: 'Foto 1', size: 2, title: 'Pink Dream', description: 'Estetika pink yang menenangkan jiwa.', category: 'Aesthetic', featured: true, likes: 243 },
+                { type: 'video', src: 'https://www.w3schools.com/html/mov_bbb.mp4', alt: 'Video 1', size: 1, title: 'Sweet Moments', description: 'Kenangan indah dalam balutan merah muda.', category: 'Moment', featured: false, likes: 156 },
+                { type: 'image', src: './foto/2.jpg', alt: 'Foto 2', size: 1, title: 'Rosy Delight', description: 'Kecantikan dalam kesederhanaan warna.', category: 'Aesthetic', featured: false, likes: 187 },
+                { type: 'video', src: 'https://www.w3schools.com/html/mov_bbb.mp4', alt: 'Video 2', size: 2, title: 'Pink Paradise', description: 'Surga kecil dalam nuansa merah muda.', category: 'Travel', featured: false, likes: 321 },
+                { type: 'image', src: './foto/3.jpg', alt: 'Foto 3', size: 3, title: 'Blush Tone', description: 'Kehalusan warna yang membuat hati berbunga.', category: 'Fashion', featured: false, likes: 178 },
+                { type: 'video', src: 'https://www.w3schools.com/html/mov_bbb.mp4', alt: 'Video 3', size: 1, title: 'Tender Love', description: 'Kasih sayang dalam sentuhan lembut.', category: 'Moment', featured: false, likes: 264 },
+                { type: 'image', src: './foto/4.jpg', alt: 'Foto 4', size: 2, title: 'Cotton Candy', description: 'Manis seperti permen kapas di sore hari.', category: 'Food', featured: false, likes: 149 },
+                { type: 'video', src: 'https://www.w3schools.com/html/mov_bbb.mp4', alt: 'Video 4', size: 2, title: 'Rose Petal', description: 'Lembut seperti kelopak mawar yang bermekaran.', category: 'Nature', featured: false, likes: 290 },
+            ];
+            
+            // State untuk memantau item yang disukai, filter aktif, dan mode tampilan
+            const [likedItems, setLikedItems] = React.useState({});
+            const [activeFilter, setActiveFilter] = React.useState('All');
+            const [viewMode, setViewMode] = React.useState('grid');
+            
+            // Kategori unik untuk filter
+            const categories = ['All', ...new Set(mediaItems.map(item => item.category))];
+            
+            // Fungsi untuk memutar video saat masuk viewport
+            const handleVideoPlay = (entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.play();
+                    } else {
+                        entry.target.pause();
+                    }
+                });
+            };
+
+            // Intersection Observer untuk video
+            React.useEffect(() => {
+                const observer = new IntersectionObserver(handleVideoPlay, {
+                    root: null,
+                    rootMargin:                     '0px',
+                    threshold: 0.5,
+                });
+
+                const videoElements = document.querySelectorAll('.gallery-item video');
+                videoElements.forEach(video => observer.observe(video));
+
+                return () => {
+                    videoElements.forEach(video => observer.unobserve(video));
+                };
+            }, []);
+            
+            // Fungsi untuk menangani klik tombol suka
+            const handleLikeClick = (index, event) => {
+                event.stopPropagation();
+                setLikedItems(prev => ({
+                    ...prev,
+                    [index]: !prev[index]
+                }));
+            };
+            
+            // Filter item berdasarkan kategori
+            const filteredItems = activeFilter === 'All' 
+                ? mediaItems 
+                : mediaItems.filter(item => item.category === activeFilter);
+                
+            return (
+                <React.Fragment>
+                    {/* Filter buttons */}
+                    <div className="filter-container">
+                        {categories.map(category => (
+                            <button 
+                                key={category} 
+                                className={`filter-button ${activeFilter === category ? 'active' : ''}`}
+                                onClick={() => setActiveFilter(category)}
+                            >
+                                {category}
+                            </button>
+                        ))}
+                    </div>
+                    
+                    {/* View mode switch */}
+                    <div className="view-mode-container">
+                        <div className="view-mode-switch">
+                            <div 
+                                className={`view-mode-button ${viewMode === 'grid' ? 'active' : ''}`}
+                                onClick={() => setViewMode('grid')}
+                            >
+                                Grid
+                            </div>
+                            <div 
+                                className={`view-mode-button ${viewMode === 'list' ? 'active' : ''}`}
+                                onClick={() => setViewMode('list')}
+                            >
+                                List
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {/* Gallery dengan mode yang dapat diubah */}
+                    <div className={`gallery ${viewMode === 'list' ? 'list-mode' : ''}`}>
+                        {filteredItems.map((item, index) => (
+                            <div
+                                key={index}
+                                className="gallery-item"
+                                data-size={item.size}
+                                data-category={item.category}
+                                data-featured={item.featured}
+                            >
+                                {item.type === 'image' ? (
+                                    <img src={item.src} alt={item.alt} loading="lazy" />
+                                ) : (
+                                    <video
+                                        src={item.src}
+                                        alt={item.alt}
+                                        muted
+                                        loop
+                                        playsInline
+                                    />
+                                )}
+                                <div className="text-overlay">
+                                    <h1>{item.title}</h1>
+                                    <p>{item.description}</p>
+                                </div>
+                                {/* Like button */}
+                                <div 
+                                    className={`like-button ${likedItems[index] ? 'active' : ''}`}
+                                    onClick={(e) => handleLikeClick(index, e)}
+                                >
+                                    <HeartIcon filled={likedItems[index]} />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </React.Fragment>
+            );
+        };
+
+        // Komponen Utama
+        const App = () => {
+
+            return (
+                <div className="min-h-screen">
+                    <div className="background-effect"></div>
+                    <Navbar />
+                    
+                  
+                    
+                    <div className="main-container">
+                        <h1 className="title">Gallery kita</h1>
+                        <Gallery />
+                    </div>
+                </div>
+            );
+        };
+
+        // Render aplikasi
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

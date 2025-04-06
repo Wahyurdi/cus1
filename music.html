@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Background Music Service</title>
+</head>
+<body>
+    <!-- Audio element yang tersembunyi dengan looping -->
+    <audio id="bgMusic" loop style="display: none;">
+        <!-- Ganti src dengan URL file musik yang Anda inginkan -->
+        <source src="./blue.mp3" type="audio/mp3">
+      
+    </audio>
+
+    <script>
+        // Script untuk mengelola musik yang berjalan terus menerus antar halaman
+        document.addEventListener('DOMContentLoaded', function() {
+            const audio = document.getElementById('bgMusic');
+            const MUSIC_TIME_KEY = 'background_music_time';
+            const MUSIC_TIMESTAMP_KEY = 'background_music_timestamp';
+            
+            // Fungsi untuk menyimpan posisi waktu musik saat ini
+            function saveCurrentTime() {
+                localStorage.setItem(MUSIC_TIME_KEY, audio.currentTime.toString());
+                localStorage.setItem(MUSIC_TIMESTAMP_KEY, Date.now().toString());
+            }
+            
+            // Simpan waktu musik secara berkala
+            setInterval(saveCurrentTime, 1000);
+            
+            // Simpan waktu musik saat pengguna meninggalkan halaman
+            window.addEventListener('beforeunload', saveCurrentTime);
+            
+            // Memulai pemutaran musik
+            function startMusic() {
+                // Cek apakah ada waktu tersimpan
+                const savedTime = localStorage.getItem(MUSIC_TIME_KEY);
+                const timestamp = localStorage.getItem(MUSIC_TIMESTAMP_KEY);
+                
+                if (savedTime && timestamp) {
+                    // Hitung berapa lama sejak terakhir disimpan (dalam detik)
+                    const elapsed = (Date.now() - parseInt(timestamp)) / 1000;
+                    
+                    // Setel waktu musik dengan memperhitungkan waktu yang berlalu
+                    const newTime = (parseFloat(savedTime) + elapsed) % audio.duration;
+                    if (!isNaN(newTime)) {
+                        audio.currentTime = newTime;
+                    }
+                }
+                
+                // Mulai putar
+                audio.play().catch(function(error) {
+                    console.log('Autoplay diblokir oleh browser');
+                    
+                    // Tambahkan event listener untuk interaksi pengguna
+                    document.addEventListener('click', function() {
+                        audio.play();
+                    }, { once: true });
+                });
+            }
+            
+            // Pastikan musik dimulai setelah metadata dimuat
+            if (audio.readyState >= 2) { // HAVE_CURRENT_DATA or higher
+                startMusic();
+            } else {
+                audio.addEventListener('loadedmetadata', startMusic);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ScanFinity</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.21.2/babel.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+   <style>
+    :root {
+        --pink-light: #ffcfe0;
+        --pink-medium: #ff9ebb;
+        --pink-dark: #ff6b9a;
+        --pink-darker: #ff4980;
+        --pink-darkest: #e02b62;
+    }
+    
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: var(--pink-light);
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden; /* Mencegah scroll horizontal */
+        box-sizing: border-box; /* Mengatur box-sizing */
+    }
+
+    *, *::before, *::after {
+        box-sizing: inherit; /* Mengatur box-sizing untuk semua elemen */
+    }
+    
+    .heart {
+        position: absolute;
+        width: 30px;
+        height: 30px;
+        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23ff6b9a"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>');
+        background-size: contain;
+        background-repeat: no-repeat;
+        animation: float 15s linear infinite;
+        opacity: 0.8;
+        z-index: 10;
+        filter: drop-shadow(0 0 5px rgba(255, 107, 154, 0.5));
+    }
+    
+    @keyframes float {
+        0% {
+            transform: translate(0, 0) rotate(0deg) scale(0.8);
+        }
+        25% {
+            transform: translate(100px, -150px) rotate(45deg) scale(1);
+        }
+        50% {
+            transform: translate(200px, -50px) rotate(90deg) scale(0.9);
+        }
+        75% {
+            transform: translate(100px, 100px) rotate(135deg) scale(1.1);
+        }
+        100% {
+            transform: translate(0, 0) rotate(180deg) scale(0.8);
+        }
+    }
+    
+    .heart:nth-child(2n) {
+        animation-duration: 20s;
+        animation-delay: 2s;
+    }
+    
+    .heart:nth-child(3n) {
+        animation-duration: 18s;
+        animation-delay: 5s;
+    }
+    
+    .heart:nth-child(4n) {
+        animation-duration: 12s;
+        animation-delay: 1s;
+        filter: drop-shadow(0 0 8px rgba(255, 107, 154, 0.7));
+    }
+    
+    .content {
+        position: relative;
+        z-index: 1;
+        padding-top: 2rem;
+    }
+    
+    .main-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        padding: 1rem;
+    }
+    
+    .content-card {
+        background-color: rgba(255, 255, 255, 0.9);
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(255, 107, 154, 0.3);
+        padding: 2rem;
+        width: 100%;
+        max-width: 520px;
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+        text-align: center;
+        position: relative;
+        z-index: 5;
+    }
+    
+    .content-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(255, 107, 154, 0.4);
+    }
+    
+    .welcome-heading {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--pink-dark);
+        margin-bottom: 1rem;
+        text-shadow: 0 2px 4px rgba(255, 107, 154, 0.3);
+    }
+    
+    .welcome-text {
+        font-size: 1.1rem;
+        color: #555;
+        margin-bottom: 2rem;
+    }
+    
+    .glitter {
+        position: absolute;
+        width: 8px;
+        height: 8px;
+        background-color: white;
+        border-radius: 50%;
+        opacity: 0.6;
+        animation: glitter 6s infinite linear;
+        z-index: 5;
+    }
+    
+    @keyframes glitter {
+        0% { transform: translateY(0) scale(0); opacity: 0; }
+        50% { transform: translateY(-100px) scale(1); opacity: 0.8; }
+        100% { transform: translateY(-200px) scale(0); opacity: 0; }
+    }
+    
+    /* Navbar Icons - Versi yang Lebih Responsif */
+    .navbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        background-color: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        box-shadow: 0 2px 10px rgba(255, 107, 154, 0.2);
+        z-index: 100;
+        padding: 0.5rem 1rem; /* Mengurangi padding untuk responsivitas */
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: all 0.3s ease;
+    }
+
+    .navbar-brand {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--pink-dark);
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .navbar-icons {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .nav-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: linear-gradient(45deg, var(--pink-dark), var(--pink-medium));
+        color: white;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        box-shadow: 0 3px 10px rgba(255, 107, 154, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .nav-icon i {
+        font-size: 1.2rem;
+        transition: all 0.3s ease;
+        z-index: 2;
+    }
+
+    .nav-icon::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.2);
+        transition: all 0.4s ease;
+        z-index: 1;
+    }
+
+    .nav-icon:hover::before {
+        left: 100%;
+    }
+
+    .nav-icon:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 15px rgba(255, 107, 154, 0.5);
+    }
+
+    .nav-icon:active {
+        transform: translateY(0);
+        box-shadow: 0 3px 8px rgba(255, 107, 154, 0.4);
+    }
+
+    .home-icon:hover {
+        background: linear-gradient(45deg, var(--pink-darkest), var(--pink-dark));
+    }
+
+    .ig-icon:hover {
+        background: linear-gradient(45deg, #833AB4, #FD1D1D, #FCAF45);
+    }
+
+    /* Label untuk ikon pada layar yang lebih besar */
+    .nav-icon .icon-label {
+        display: none;
+        margin-left: 8px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: white;
+    }
+
+    /* Animasi untuk ikon */
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.15); }
+        100% { transform: scale(1); }
+    }
+
+    /* Ketika navbar di-scroll ke bawah (bisa ditambahkan dengan JavaScript) */
+    .navbar.scrolled {
+        padding: 0.3rem 1rem;
+        background-color: rgba(255, 255, 255, 0.95);
+        box-shadow: 0 3px 10px rgba(255, 107, 154, 0.3);
+    }
+
+    /* Responsive Styles - Ditingkatkan */
+    @media screen and (min-width: 992px) {
+        /* Pada layar besar, tambahkan animasi hover yang lebih menarik */
+        .nav-icon:hover i {
+            animation: pulse 1s infinite;
+        }
+        
+        /* Efek hover yang lebih halus */
+        .navbar-brand:hover {
+            color: var(--pink-darker);
+            transform: translateY(-2px);
+        }
+    }
+
+    @media screen and (min-width: 768px) and (max-width: 991px) {
+        .navbar {
+            padding: 0.5rem 1.5rem;
+        }
+        
+        .nav-icon {
+            width: 36px;
+            height: 36px;
+        }
+        
+        .nav-icon i {
+            font-size: 1.1rem;
+        }
+    }
+
+    @media screen and (min-width: 576px) and (max-width: 767px) {
+        .navbar {
+            padding: 0.4rem 1rem;
+        }
+        
+        .navbar-brand {
+            font-size: 1.3rem;
+        }
+        
+        .nav-icon {
+            width: 34px;
+            height: 34px;
+        }
+        
+        .nav-icon i {
+            font-size: 1rem;
+        }
+        
+        .navbar-icons {
+            gap: 0.8rem;
+        }
+    }
+
+    @media screen and (max-width: 575px) {
+        .navbar {
+            padding: 0.3rem 0.8rem;
+        }
+        
+        .navbar-brand {
+            font-size: 1.2rem;
+            max-width: 150px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .nav-icon {
+            width: 32px;
+            height: 32px;
+        }
+        
+        .nav-icon i {
+            font-size: 0.9rem;
+        }
+        
+        .navbar-icons {
+            gap: 0.6rem;
+        }
+    }
+
+    /* Handle untuk orientasi landscape pada perangkat mobile */
+    @media screen and (max-height: 500px) and (orientation: landscape) {
+        .navbar {
+            padding: 0.2rem 1rem;
+        }
+        
+        .nav-icon {
+            width: 30px;
+            height: 30px;
+        }
+        
+        .nav-icon i {
+            font-size: 0.85rem;
+        }
+    }
+
+    /* Opsi tampilan label pada layar lebih besar (opsional) */
+    @media screen and (min-width: 1200px) {
+        .nav-icon {
+            width: auto;
+            border-radius: 20px;
+            padding: 0 15px;
+        }
+        
+        .nav-icon .icon-label {
+            display: inline-block;
+        }
+    }
+    
+    /* Menambahkan gaya untuk countdown */
+    .countdown-container {
+        display: flex;
+        justify-content: center;
+        margin: 1.5rem 0;
+        flex-wrap: wrap;
+    }
+    
+    .countdown-box {
+        background: linear-gradient(135deg, var(--pink-dark), var(--pink-darkest));
+        color: white;
+        border-radius: 10px;
+        padding: 1rem;
+        margin: 0.5rem;
+        min-width: 90px;
+        box-shadow: 0 5px 15px rgba(255, 107, 154, 0.3);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .countdown-box::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(to bottom, rgba(255,255,255,0.2), rgba(255,255,255,0));
+        pointer-events: none;
+    }
+    
+    .countdown-value {
+        font-size: 2.2rem;
+        font-weight: 700;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+    
+    .countdown-label {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-top: 0.5rem;
+        opacity: 0.9;
+    }
+    
+    /* Menambahkan gaya untuk kartu poker */
+    .poker-cards-container {
+        display: flex;
+        justify-content: center;
+        margin: 2rem 0;
+        perspective: 1000px;
+    }
+    
+    .poker-card {
+        width: 140px;
+        height: 200px;
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        margin: 0 -35px;
+        position: relative;
+        transition: all 0.5s ease;
+        transform-style: preserve-3d;
+        transform: rotateY(0deg) rotate(0deg);
+        overflow: hidden;
+        border: 1px solid #eee;
+    }
+    
+    .poker-card:hover {
+        transform: translateY(-20px) rotateY(20deg) rotate(5deg);
+        box-shadow: 0 20px 30px rgba(0, 0, 0, 0.3);
+        z-index: 20;
+    }
+    
+    .poker-card.card-1 {
+        transform: rotate(-15deg);
+        z-index: 1;
+    }
+    
+    .poker-card.card-2 {
+        transform: translateY(-10px);
+        z-index: 2;
+    }
+    
+    .poker-card.card-3 {
+        transform: rotate(15deg);
+        z-index: 1;
+    }
+    
+    .poker-card.card-1:hover {
+        transform: translateY(-20px) rotate(-5deg);
+    }
+    
+    .poker-card.card-3:hover {
+        transform: translateY(-20px) rotate(5deg);
+    }
+    
+    .poker-card-inner {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    
+    .poker-card-photo {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 1;
+    }
+    
+    .poker-card-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, rgba(255,255,255,0.8), rgba(255,255,255,0.2));
+        z-index: 2;
+        opacity: 0.5;
+        transition: opacity 0.3s ease;
+    }
+    
+    .poker-card:hover .poker-card-overlay {
+        opacity: 0.2;
+    }
+    
+    .poker-card-symbol {
+        position: absolute;
+        font-size: 2rem;
+        font-weight: bold;
+        color: var(--pink-darkest);
+        background-color: rgba(255,255,255,0.8);
+        padding: 5px;
+        border-radius: 5px;
+        z-index: 3;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    
+    .poker-card-symbol.top-left {
+        top: 10px;
+        left: 10px;
+    }
+    
+    .poker-card-symbol.bottom-right {
+        bottom: 10px;
+        right: 10px;
+        transform: rotate(180deg);
+    }
+    
+    /* Efek kilatan pada kartu */
+    .poker-card::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(
+            to right,
+            rgba(255, 255, 255, 0) 0%,
+            rgba(255, 255, 255, 0.3) 50%,
+            rgba(255, 255, 255, 0) 100%
+        );
+        transform: rotate(30deg);
+        animation: cardShimmer 4s infinite linear;
+        z-index: 4;
+        pointer-events: none;
+    }
+    
+    @keyframes cardShimmer {
+        0% { transform: translateX(-100%) rotate(30deg); }
+        100% { transform: translateX(100%) rotate(30deg); }
+    }
+    
+    /* Responsif */
+    @media (max-width: 1213px) {
+        .content-card {
+            max-width: 90%;
+            padding: 1.5rem;
+        }
+        
+        .content {
+            padding: 1rem;
+        }
+        
+        .poker-card {
+            width: 120px;
+            height: 170px;
+            margin: 0 -25px;
+        }
+        
+        .countdown-box {
+            min-width: 80px;
+            padding: 0.8rem;
+        }
+    }
+    
+    @media (max-width: 640px) {
+        .content-card {
+            padding: 1.5rem;
+            max-width: 95%;
+        }
+        
+        .welcome-heading {
+            font-size: 1.7rem;
+        }
+        
+        .welcome-text {
+            font-size: 1rem;
+        }
+        
+        .poker-card {
+            width: 90px;
+            height: 130px;
+            margin: 0 -20px;
+        }
+        
+        .poker-card-symbol {
+            font-size: 1.2rem;
+            padding: 3px;
+        }
+        
+        .countdown-box {
+            min-width: 70px;
+            padding: 0.7rem;
+        }
+        
+        .countdown-value {
+            font-size: 1.5rem;
+        }
+    }
+    
+    /* Untuk layar sangat kecil */
+    @media (max-width: 360px) {
+        .poker-card {
+            width: 70px;
+            height: 100px;
+            margin: 0 -15px;
+        }
+        
+        .poker-card-symbol {
+            font-size: 1rem;
+            padding: 2px;
+        }
+        
+        .countdown-box {
+            min-width: 60px;
+            padding: 0.6rem;
+            margin: 0.3rem;
+        }
+        
+        .countdown-value {
+            font-size: 1.3rem;
+        }
+    }
+    
+    /* Shimmer effect */
+    .content-card {
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .content-card::after {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(
+            to right,
+            rgba(255, 255, 255, 0) 0%,
+            rgba(255, 255, 255, 0.1) 50%,
+            rgba(255, 255, 255, 0) 100%
+        );
+        transform: rotate(30deg);
+        animation: shimmer 6s infinite linear;
+        z-index: 1;
+        pointer-events: none;
+    }
+    
+    @keyframes shimmer {
+        0% { transform: translateX(-100%) rotate(30deg); }
+        100% { transform: translateX(100%) rotate(30deg); }
+    }
+    
+    /* Make the popup frame visible */
+    #popup-frame {
+        display: block;
+    }
+    
+    /* Background gradient */
+    .background {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #ffe6f0 0%, #ffb6c1 100%);
+        z-index: -1;
+    }
+    
+    /* Efek konfeti */
+    .confetti {
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        background-color: var(--pink-medium);
+        opacity: 0.7;
+        animation: confetti 8s linear infinite;
+        z-index: 0;
+    }
+    
+    .confetti.yellow {
+        background-color: #FFD700;
+    }
+    
+    .confetti.blue {
+        background-color: #87CEFA;
+    }
+    
+    @keyframes confetti {
+        0% { 
+            transform: translateY(-100px) rotate(0deg);
+            opacity: 1;
+        }
+        100% { 
+            transform: translateY(1000px) rotate(360deg);
+            opacity: 0;
+        }
+    }
+    
+    .confetti:nth-child(2n) {
+        width: 15px;
+        height: 7px;
+        animation-duration: 9s;
+        animation-delay: 1s;
+    }
+    
+    .confetti:nth-child(3n) {
+        width: 12px;
+        height: 12px;
+        animation-duration: 7s;
+        animation-delay: 2.5s;
+    }
+    
+    /* Efek putaran pada kartu */
+    @keyframes cardFlip {
+        0% { transform: rotateY(0deg); }
+        100% { transform: rotateY(360deg); }
+    }
+    
+    .poker-card.card-2:hover {
+        animation: cardFlip 1s linear;
+    }
+    
+    /* Upload button styling */
+    .upload-button {
+        background-color: var(--pink-dark);
+        color: white;
+        border: none;
+        border-radius: 30px;
+        padding: 10px 20px;
+        font-size: 1rem;
+        font-weight: 600;
+        margin-top: 1rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 10px rgba(255, 107, 154, 0.3);
+    }
+    
+    .upload-button:hover {
+        background-color: var(--pink-darkest);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(255, 107, 154, 0.4);
+    }
+    
+    .upload-container {
+        margin-top: 1rem;
+    }
+    
+    .file-input {
+        display: none;
+    }
+</style>
+</head>
+<body>
+    <div id="root"></div>
+    <!-- Popup iframe - now visible by default -->
+    <iframe src="popup.html" style="border: none; position: fixed; bottom: 0; right: 0; width: 200px; height: 300px; z-index: 9999; background: transparent; pointer-events: all;" id="popup-frame"></iframe>
+    
+   <script>
+    // Kode untuk menangani komunikasi dengan iframe
+    window.addEventListener('message', function(event) {
+        // Pastikan pesan berasal dari iframe popup
+        if (event.data && event.data.action) {
+            switch(event.data.action) {
+                case 'navigate':
+                    // Navigasi ke halaman yang dipilih
+                    window.location.href = event.data.data;
+                    break;
+                case 'ready':
+                    console.log('Pop-up menu siap');
+                    break;
+            }
+        }
+    });
+</script>
+
+<script type="text/babel">
+    // Komponen Heart (Hati)
+    const Heart = ({ id }) => {
+        const style = {
+            top: `${Math.random() * 100}%`,
+            left: `${Math.random() * 100}%`,
+            animationDelay: `${Math.random() * 10}s`,
+            animationDuration: `${15 + Math.random() * 10}s`,
+            transform: `scale(${0.5 + Math.random() * 1})`,
+            opacity: 0.6 + Math.random() * 0.4,
+        };
+        
+        return <div className="heart" style={style}></div>;
+    };
+    
+    // Komponen Glitter untuk efek kilau
+    const Glitter = ({ id }) => {
+        const style = {
+            top: `${Math.random() * 100}%`,
+            left: `${Math.random() * 100}%`,
+            animationDelay: `${Math.random() * 5}s`,
+            opacity: 0.4 + Math.random() * 0.4,
+        };
+        
+        return <div className="glitter" style={style}></div>;
+    };
+    
+    // Komponen Confetti
+    const Confetti = ({ id }) => {
+        const colors = ['', 'yellow', 'blue'];
+        const colorClass = colors[id % 3];
+        
+        const style = {
+            top: `${Math.random() * 100}%`,
+            left: `${Math.random() * 100}%`,
+            animationDelay: `${Math.random() * 5}s`,
+            transform: `rotate(${Math.random() * 360}deg)`,
+        };
+        
+        return <div className={`confetti ${colorClass}`} style={style}></div>;
+    };
+    
+    const Navbar = () => {
+        return (
+            <nav className="navbar">
+                <a href="#" className="navbar-brand">ScanFinity</a>
+                <div className="navbar-icons">
+                    <a href="layout.html" className="nav-icon home-icon" title="Home">
+                        <i className="fas fa-home"></i>
+                        <span className="icon-label">Home</span>
+                    </a>
+                    <a href="https://www.instagram.com/scanfinity?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="_blank" className="nav-icon ig-icon" title="Instagram">
+                        <i className="fab fa-instagram"></i>
+                        <span className="icon-label">Instagram</span>
+                    </a>
+                </div>
+            </nav>
+        );
+    };
+    
+    // Komponen Countdown
+    const Countdown = () => {
+        const [timeLeft, setTimeLeft] = React.useState({
+            days: 0,
+            hours: 0,
+            minutes: 0,
+            seconds: 0
+        });
+        
+        React.useEffect(() => {
+            const calculateTimeLeft = () => {
+                // Tanggal target: 19 September 2025
+                const targetDate = new Date(new Date().getFullYear(), 8, 19); // Bulan dimulai dari 0, jadi September = 8
+                
+                // Jika tanggal sudah lewat tahun ini, gunakan tahun depan
+                if (targetDate < new Date()) {
+                    targetDate.setFullYear(targetDate.getFullYear() + 1);
+                }
+                
+                const difference = targetDate - new Date();
+                
+                if (difference > 0) {
+                    const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+                    
+                    setTimeLeft({
+                        days,
+                        hours,
+                        minutes,
+                        seconds
+                    });
+                }
+            };
+            
+            // Menghitung awal dan memperbarui setiap detik
+            calculateTimeLeft();
+            const timer = setInterval(calculateTimeLeft, 1000);
+            
+            // Membersihkan timer saat komponen unmount
+            return () => clearInterval(timer);
+        }, []);
+        
+        return (
+            <div className="countdown-container">
+                <div className="countdown-box">
+                    <div className="countdown-value">{timeLeft.days}</div>
+                    <div className="countdown-label">Hari</div>
+                </div>
+                <div className="countdown-box">
+                    <div className="countdown-value">{timeLeft.hours}</div>
+                    <div className="countdown-label">Jam</div>
+                </div>
+                <div className="countdown-box">
+                    <div className="countdown-value">{timeLeft.minutes}</div>
+                    <div className="countdown-label">Menit</div>
+                </div>
+                <div className="countdown-box">
+                    <div className="countdown-value">{timeLeft.seconds}</div>
+                    <div className="countdown-label">Detik</div>
+                </div>
+            </div>
+        );
+    };
+    
+    // Komponen Kartu Poker dengan Foto
+    const PhotoPokerCard = ({ symbol, value, className, photoUrl, onUpload }) => {
+        return (
+            <div className={`poker-card ${className}`}>
+                <div className="poker-card-inner">
+                    <img 
+                        src={photoUrl || "/api/placeholder/400/600"} 
+                        alt="Card Photo" 
+                        className="poker-card-photo" 
+                    />
+                    <div className="poker-card-overlay"></div>
+                    <div className="poker-card-symbol top-left">{value}{symbol}</div>
+                    <div className="poker-card-symbol bottom-right">{value}{symbol}</div>
+                </div>
+            </div>
+        );
+    };
+    
+    // Main App component
+    const App = () => {
+        const [photos, setPhotos] = React.useState({
+            card1: null,
+            card2: null,
+            card3: null
+        });
+        
+        const fileInputRefs = {
+            card1: React.useRef(null),
+            card2: React.useRef(null),
+            card3: React.useRef(null)
+        };
+        
+        // Handle file upload
+        const handleFileChange = (cardId, e) => {
+            if (e.target.files && e.target.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    setPhotos(prev => ({
+                        ...prev,
+                        [cardId]: event.target.result
+                    }));
+                };
+                reader.readAsDataURL(e.target.files[0]);
+            }
+        };
+        
+                    const triggerFileInput = (cardId) => {
+            fileInputRefs[cardId].current.click();
+        };
+        
+        // Create heart and glitter effects
+        const hearts = Array.from({ length: 20 }, (_, i) => <Heart key={`heart-${i}`} id={i} />);
+        const glitters = Array.from({ length: 40 }, (_, i) => <Glitter key={`glitter-${i}`} id={i} />);
+        const confetti = Array.from({ length: 30 }, (_, i) => <Confetti key={`confetti-${i}`} id={i} />);
+        
+        return (
+            <div className="min-h-screen">
+                <div className="background"></div>
+                <Navbar />
+                
+                {hearts}
+                {glitters}
+                {confetti}
+                
+                <div className="main-container">
+                    <div className="content-card">
+                        <h1 className="welcome-heading">Coming Soon!</h1>
+                        <p className="welcome-text">Menghitung mundur menuju 19 September</p>
+                        
+                        <Countdown />
+                        
+                        <div className="poker-cards-container">
+                            <PhotoPokerCard 
+                                className="card-1" 
+                                photoUrl={photos.card1} 
+                                onUpload={() => triggerFileInput('card1')}
+                            />
+                            <PhotoPokerCard 
+                                className="card-2" 
+                                photoUrl={photos.card2} 
+                                onUpload={() => triggerFileInput('card2')}
+                            />
+                            <PhotoPokerCard 
+                                className="card-3" 
+                                photoUrl={photos.card3} 
+                                onUpload={() => triggerFileInput('card3')}
+                            />
+                        </div>
+                        
+                        <p className="welcome-text mt-6">MASISISIISISI</p>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+    
+    // Render application
+    ReactDOM.render(<App />, document.getElementById('root'));
+</script>
+</body>
+</html>
